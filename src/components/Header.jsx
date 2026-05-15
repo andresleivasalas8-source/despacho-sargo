@@ -7,7 +7,7 @@ const NAV = [
   { key: 'flota',         label: 'Flota',         labelMob: 'Flota',    path: '/' },
   { key: 'clientes',      label: 'Clientes',      labelMob: 'Clientes', path: '/clientes' },
   { key: 'pedidos',       label: 'Pedidos',       labelMob: 'Pedidos',  path: '/pedidos' },
-  { key: 'planificacion', label: 'Planificación', labelMob: 'Planif.',  path: '/planificacion' },
+  { key: 'planificacion', label: 'Planificación', labelMob: 'Plan.',    path: '/planificacion' },
 ]
 
 export default function Header({ active, user, gpsAge: gpsAgeProp }) {
@@ -54,11 +54,11 @@ export default function Header({ active, user, gpsAge: gpsAgeProp }) {
     <header className="app-header">
 
       {/* Fila 1: logo + derecha (GPS + user + salir) */}
-      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: isMobile ? 62 : '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: isMobile ? 70 : '100%' }}>
 
         {/* Logo */}
-        <div style={{ ...s.logoWrap, height: isMobile ? 62 : '100%' }}>
-          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 165 : 200, transform: isMobile ? 'scale(1.5)' : 'scale(1.55)' }} />
+        <div style={{ ...s.logoWrap, height: isMobile ? 70 : '100%' }}>
+          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 182 : 200, transform: isMobile ? 'scale(1.55)' : 'scale(1.55)' }} />
           <div style={s.logoFade} />
         </div>
 
