@@ -11,7 +11,7 @@
 ;(function () {
 
   const SUPABASE_URL = 'https://kptqhtaemrikmeubnerz.supabase.co'
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdHFodGFlbXJpa21ldWJuZXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0OTE2OTIsImV4cCI6MjA2MjA2NzY5Mn0.avU2YeeyZ-VtWSXm3hHKDg_1LvUos5dJ5UwCgXDCBM0'
+  const SUPABASE_KEY = 'sb_publishable_avU2YeeyZ-VtWSXm3hHKDg_1LvUos5d'
   const INTERVALO_MS = 30_000
   const LOG = '[SARGO GPS]'
 
