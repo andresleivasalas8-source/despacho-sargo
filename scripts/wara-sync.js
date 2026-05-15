@@ -5,8 +5,9 @@
 //  los manda a la app de despacho cada 30 segundos, y actualiza
 //  automáticamente el estado de los viajes según la ubicación del camión.
 //
-//  Para detener: _sargoSync.detener()
-//  Para forzar sync ya: _sargoSync.syncAhora()
+//  Para detener:    _sargoSync.detener()
+//  Para forzar sync: _sargoSync.syncAhora()
+//  Para diagnostico: _sargoSync.diagnostico()
 // ═══════════════════════════════════════════════════════════════════
 
 ;(function () {
@@ -18,7 +19,6 @@
 
   const DEPOT = { lat: -32.9310777, lng: -68.8202575 }
 
-  // WARA movil_id → nombre de unidad en la app
   const WARA_MAP = {
     106966: '104',
     80128:  '106',
@@ -75,61 +75,74 @@
   }
 
   // ── API helper ─────────────────────────────────────────────────────
-  function sbFetch(path, opts) {
+  async function sb(path, opts) {
     const headers = Object.assign({
       apikey: SUPABASE_KEY,
       Authorization: 'Bearer ' + SUPABASE_KEY,
       'Content-Type': 'application/json',
-    }, opts && opts.headers)
-    return fetch(SUPABASE_URL + path, Object.assign({}, opts, { headers }))
-  }
-
-  // ── Cargar UUIDs de Supabase (una sola vez) ────────────────────────
-  let unidades = null
-  async function cargarUnidades() {
-    const r = await sbFetch('/rest/v1/unidades?select=id,nombre')
-    if (!r.ok) throw new Error('No se pudieron cargar unidades: HTTP ' + r.status)
+    }, (opts && opts.headers) || {})
+    const r = await fetch(SUPABASE_URL + path, Object.assign({}, opts, { headers }))
+    if (!r.ok) {
+      const txt = await r.text()
+      console.error(LOG, 'HTTP ' + r.status + ' en ' + path + ':', txt.slice(0, 200))
+      return null
+    }
     return r.json()
   }
 
-  // ── Geofences: actualiza estado de viajes activos ──────────────────
+  // ── Cargar unidades una sola vez ───────────────────────────────────
+  let unidades = null
+  async function cargarUnidades() {
+    const data = await sb('/rest/v1/unidades?select=id,nombre')
+    if (!data) throw new Error('No se pudieron cargar unidades (ver error arriba)')
+    return data
+  }
+
+  // ── Geofences ──────────────────────────────────────────────────────
   async function procesarGeo(positions) {
-    const [vRes, pRes, oRes] = await Promise.all([
-      sbFetch('/rest/v1/viajes?select=id,estado,unidad_id,pedido_id&estado=in.(cargando,viaje,obra,volviendo)'),
-      sbFetch('/rest/v1/pedidos?select=id,obra_id'),
-      sbFetch('/rest/v1/obras?select=id,lat,lng'),
+    const [viajes, pedidos, obras] = await Promise.all([
+      sb('/rest/v1/viajes?select=id,estado,unidad_id,pedido_id&estado=in.(cargando,viaje,obra,volviendo)'),
+      sb('/rest/v1/pedidos?select=id,obra_id'),
+      sb('/rest/v1/obras?select=id,lat,lng'),
     ])
 
-    const viajes  = vRes.ok  ? await vRes.json()  : []
-    const pedidos = pRes.ok  ? await pRes.json()  : []
-    const obras   = oRes.ok  ? await oRes.json()  : []
+    if (!viajes) {
+      console.warn(LOG, 'No se pudo leer viajes — probable falta de permiso RLS. Ver instrucciones.')
+      return
+    }
+    if (!viajes.length) {
+      console.log(LOG, 'Sin viajes activos para procesar geofences.')
+      return
+    }
 
-    if (!viajes.length) return
-
+    console.log(LOG, 'Procesando geofences para ' + viajes.length + ' viaje(s) activo(s)...')
     const ahora = new Date().toISOString()
 
     for (const viaje of viajes) {
       const pos = positions.find(p => p.unidad_id === viaje.unidad_id)
-      if (!pos) continue
+      if (!pos) {
+        console.log(LOG, 'Sin GPS para viaje ' + viaje.id + ' (unidad ' + viaje.unidad_id + ')')
+        continue
+      }
 
-      const pedido = pedidos.find(p => p.id === viaje.pedido_id)
-      const obra   = pedido ? obras.find(o => o.id === pedido.obra_id) : null
+      const pedido = pedidos && pedidos.find(p => p.id === viaje.pedido_id)
+      const obra   = (pedido && obras) ? obras.find(o => o.id === pedido.obra_id) : null
 
       const distDeposito = haversineM(pos.lat, pos.lng, DEPOT.lat, DEPOT.lng)
       const distObra     = obra ? haversineM(pos.lat, pos.lng, parseFloat(obra.lat), parseFloat(obra.lng)) : null
 
+      console.log(LOG, 'Viaje ' + viaje.id + ' estado=' + viaje.estado + ' dist_deposito=' + Math.round(distDeposito) + 'm' + (distObra !== null ? ' dist_obra=' + Math.round(distObra) + 'm' : ' (sin obra)'))
+
       let update = null
-      if      (viaje.estado === 'cargando'  && distDeposito > 200)                       update = { estado: 'viaje',    viaje_at:    ahora }
-      else if (viaje.estado === 'viaje'     && distObra !== null && distObra < 400)       update = { estado: 'obra',     obra_at:     ahora }
-      else if (viaje.estado === 'obra'      && distObra !== null && distObra > 400)       update = { estado: 'volviendo', volviendo_at: ahora }
-      else if (viaje.estado === 'volviendo' && distDeposito < 200)                        update = { estado: 'done',     done_at:     ahora }
+      if      (viaje.estado === 'cargando'  && distDeposito > 200)                 update = { estado: 'viaje',     viaje_at:     ahora }
+      else if (viaje.estado === 'viaje'     && distObra !== null && distObra < 400) update = { estado: 'obra',      obra_at:      ahora }
+      else if (viaje.estado === 'obra'      && distObra !== null && distObra > 400) update = { estado: 'volviendo', volviendo_at: ahora }
+      else if (viaje.estado === 'volviendo' && distDeposito < 200)                  update = { estado: 'done',      done_at:      ahora }
 
       if (update) {
-        const r = await sbFetch('/rest/v1/viajes?id=eq.' + viaje.id, { method: 'PATCH', body: JSON.stringify(update) })
-        if (r.ok) {
-          console.log(LOG, 'Transicion: unidad ' + viaje.unidad_id + ' → ' + update.estado + ' (dist_deposito=' + Math.round(distDeposito) + 'm' + (distObra !== null ? ', dist_obra=' + Math.round(distObra) + 'm' : '') + ')')
-        } else {
-          console.warn(LOG, 'Error actualizando viaje ' + viaje.id + ':', await r.text())
+        const ok = await sb('/rest/v1/viajes?id=eq.' + viaje.id, { method: 'PATCH', body: JSON.stringify(update) })
+        if (ok !== null) {
+          console.log(LOG, 'TRANSICION OK: ' + viaje.estado + ' → ' + update.estado)
         }
       }
     }
@@ -138,22 +151,24 @@
   // ── Sync principal ─────────────────────────────────────────────────
   let syncCount  = 0
   let errorCount = 0
+  let ultimasPositions = []
 
   async function sync() {
-    const equipos = window.xdata?.equipos
+    const equipos = window.xdata && window.xdata.equipos
     if (!equipos) {
-      console.warn(LOG, 'window.xdata.equipos no disponible — ¿está WARA cargado con los móviles visibles?')
+      console.warn(LOG, 'window.xdata.equipos no disponible')
       setBadge('warn', 'Sin datos GPS', 'Esperando WARA...')
       return
     }
 
     if (!unidades) {
       unidades = await cargarUnidades()
-      console.log(LOG, unidades.length + ' unidades cargadas de Supabase')
+      console.log(LOG, unidades.length + ' unidades cargadas')
     }
 
     const rows = []
-    for (const [key, eq] of Object.entries(equipos)) {
+    for (const key in equipos) {
+      const eq = equipos[key]
       const movilId = eq.movil_id != null ? eq.movil_id : Number(key)
       const nombre  = WARA_MAP[movilId]
       if (!nombre) continue
@@ -165,40 +180,48 @@
       const ignicion = eq.tramas && eq.tramas.ignicion && eq.tramas.ignicion[0]
       if (!pos) continue
 
+      const lat = pos.latitud  / 10000000
+      const lng = pos.longitud / 10000000
+      const ts  = eq.fecha_ultimo_reporte || new Date().toISOString()
+
       rows.push({
         unidad_id: unidad.id,
-        lat:   pos.latitud   / 10000000,
-        lng:   pos.longitud  / 10000000,
+        lat:   lat,
+        lng:   lng,
         vel:   pos.velocidad != null ? pos.velocidad : 0,
         motor: ignicion ? !!ignicion.presente : false,
-        ts:    eq.fecha_ultimo_reporte || new Date().toISOString(),
+        ts:    ts,
       })
     }
 
     if (!rows.length) {
-      console.warn(LOG, 'Sin posiciones validas para las unidades de Sargo')
-      setBadge('warn', '0 unidades mapeadas', 'Ver consola')
+      setBadge('warn', '0 unidades', 'Ver consola')
       return
     }
 
-    const resp = await sbFetch('/rest/v1/gps_actual', {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/gps_actual', {
       method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates' },
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates',
+      },
       body: JSON.stringify(rows),
     })
 
     if (!resp.ok) {
       const txt = await resp.text()
-      throw new Error('HTTP ' + resp.status + ': ' + txt.slice(0, 120))
+      throw new Error('gps_actual HTTP ' + resp.status + ': ' + txt.slice(0, 120))
     }
 
-    // Geofences — corre en esta misma pestaña, no depende de la app
+    ultimasPositions = rows
     await procesarGeo(rows)
 
     syncCount++
     errorCount = 0
     const hora = new Date().toTimeString().slice(0, 8)
-    console.log(LOG, 'Sync #' + syncCount + ' · ' + hora + ' · ' + rows.length + ' unidades')
+    console.log(LOG, 'Sync #' + syncCount + ' ' + hora + ' — ' + rows.length + ' unidades OK')
     setBadge('ok', rows.length + ' unidades · ' + hora, 'sync #' + syncCount)
   }
 
@@ -210,16 +233,29 @@
       console.error(LOG, 'Error:', e.message)
       setBadge('error', 'Error (' + errorCount + ')', e.message.slice(0, 50))
       if (errorCount >= 5) {
-        console.error(LOG, '5 errores seguidos — deteniendose. Recarga WARA y pega el script de nuevo.')
         setBadge('error', 'DETENIDO', 'Recargar WARA y repetir')
         detener()
       }
     }
   }
 
+  // ── Diagnóstico ────────────────────────────────────────────────────
+  function diagnostico() {
+    console.log('=== SARGO DIAGNOSTICO ===')
+    console.log('syncCount:', syncCount, '| errorCount:', errorCount)
+    console.log('unidades cargadas:', unidades ? unidades.length : 'NO')
+    console.log('ultimas posiciones:')
+    for (const p of ultimasPositions) {
+      const u = unidades && unidades.find(u => u.id === p.unidad_id)
+      const distDep = Math.round(haversineM(p.lat, p.lng, DEPOT.lat, DEPOT.lng))
+      console.log('  ' + (u ? u.nombre : p.unidad_id) + ': lat=' + p.lat.toFixed(5) + ' lng=' + p.lng.toFixed(5) + ' vel=' + p.vel + ' dist_deposito=' + distDep + 'm ts=' + p.ts)
+    }
+    console.log('=========================')
+  }
+
   // ── Arranque ───────────────────────────────────────────────────────
   let intervaloId = null
-  function detener() { clearInterval(intervaloId); intervaloId = null; console.log(LOG, 'Sync detenido.') }
+  function detener() { clearInterval(intervaloId); intervaloId = null; console.log(LOG, 'Detenido.') }
   function iniciar() {
     if (intervaloId) { console.log(LOG, 'Ya esta corriendo.'); return }
     crearBadge()
@@ -230,13 +266,17 @@
   }
 
   window._sargoSync = {
-    detener,
-    syncAhora: syncSeguro,
+    detener:     detener,
+    syncAhora:   syncSeguro,
+    diagnostico: diagnostico,
     estado: function() { return { syncCount: syncCount, errorCount: errorCount, unidades: unidades ? unidades.length : 0 } },
   }
 
   iniciar()
 
-  console.log(LOG, 'Comandos: _sargoSync.detener() | _sargoSync.syncAhora() | _sargoSync.estado()')
+  console.log(LOG, 'Comandos disponibles:')
+  console.log('  _sargoSync.syncAhora()   — forzar sync inmediato')
+  console.log('  _sargoSync.diagnostico() — ver posiciones y distancias actuales')
+  console.log('  _sargoSync.detener()     — pausar')
 
 })()
