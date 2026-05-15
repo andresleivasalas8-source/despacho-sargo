@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const TIPOS_HORMIGON = ['H-8', 'H-13', 'H-17', 'H-21', 'H-25', 'H-30', 'H-35', 'H-40', 'H ALIVIANADO', 'HDRC']
 const DEPOT = { lat: -32.9310777, lng: -68.8202575 }
 
 export default function Pedidos() {
+  const isMobile = useIsMobile()
   const [user, setUser] = useState(null)
   const [pedidos, setPedidos] = useState([])
   const [clientes, setClientes] = useState([])
@@ -158,7 +160,7 @@ export default function Pedidos() {
     <div style={styles.container}>
       <Header active="pedidos" user={user} />
 
-      <main style={styles.main}>
+      <main style={{ ...styles.main, padding: isMobile ? 12 : 24 }}>
         <h2 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase' }}>Pedidos</h2>
         <div style={styles.toolbar}>
           <div style={styles.fechaWrap}>

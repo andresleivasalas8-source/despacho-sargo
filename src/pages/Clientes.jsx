@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import { useIsMobile } from '../hooks/useIsMobile'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -26,6 +27,7 @@ export default function Clientes() {
   const [user, setUser] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     checkUser()
@@ -61,7 +63,7 @@ export default function Clientes() {
     <div style={styles.container}>
       <Header active="clientes" user={user} />
 
-      <main style={styles.main}>
+      <main style={{ ...styles.main, padding: isMobile ? 12 : 24 }}>
         <div style={styles.toolbar}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <h2 style={styles.toolbarTitle}>Clientes ({clientes.length})</h2>
@@ -242,6 +244,7 @@ function ClienteForm({ onClose, onSaved }) {
 
 // ─── COMPONENTE: FORMULARIO NUEVA OBRA ──────────────────────────────
 function ObraForm({ clienteId, cliente, onClose, onSaved }) {
+  const isMobile = useIsMobile()
   const [nombre, setNombre] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
@@ -456,15 +459,15 @@ function ObraForm({ clienteId, cliente, onClose, onSaved }) {
 
   return (
     <div style={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <form onSubmit={handleSubmit} style={sO.wideModal}>
+      <form onSubmit={handleSubmit} style={{ ...sO.wideModal, maxWidth: isMobile ? '100%' : 900, padding: isMobile ? 16 : 24 }}>
         {/* Header */}
         <div style={styles.modalHeader}>
           <h3 style={styles.modalTitle}>Nueva obra · {cliente?.nombre}</h3>
           <button type="button" onClick={onClose} style={styles.btnClose}>✕</button>
         </div>
 
-        {/* 2-column layout — altura determinada por columna izquierda, mapa se estira */}
-        <div style={sO.twoCol}>
+        {/* 2-column layout — en mobile: 1 columna */}
+        <div style={{ ...sO.twoCol, gridTemplateColumns: isMobile ? '1fr' : '1fr 1.55fr' }}>
 
           {/* LEFT: todos los campos + route box */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, minWidth: 0 }}>
@@ -611,9 +614,9 @@ function ObraForm({ clienteId, cliente, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* RIGHT: mapa se estira a toda la altura de la columna izquierda */}
+          {/* RIGHT: mapa */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-            <div style={sO.mapWrapLg}>
+            <div style={{ ...sO.mapWrapLg, ...(isMobile ? { flex: 'none', height: 220, minHeight: 220 } : {}) }}>
               <div ref={mapDivRef} style={{ width: '100%', height: '100%' }} />
               {!coords && <div style={sO.mapHint}>Buscá una dirección o hacé clic aquí para ubicar la obra</div>}
             </div>

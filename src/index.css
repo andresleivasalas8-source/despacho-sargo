@@ -316,3 +316,56 @@ button:disabled {
   background: rgba(255, 255, 255, 0.20) !important;
   border-color: rgba(255, 255, 255, 0.42) !important;
 }
+
+/* ── Mobile ───────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+
+  /* Header: 2 filas — logo+acciones arriba, nav abajo */
+  .app-header {
+    height: auto !important;
+    flex-wrap: wrap;
+    padding-bottom: 0;
+  }
+
+  /* Fila de nav en mobile — ocupa todo el ancho */
+  .app-header-nav {
+    order: 2;
+    width: 100%;
+    display: flex;
+    justify-content: stretch;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding: 0 4px 4px;
+    gap: 2px;
+  }
+
+  .nav-btn {
+    font-size: 13px !important;
+    padding: 7px 6px !important;
+    flex: 1;
+    text-align: center;
+    border-radius: 7px !important;
+  }
+
+  /* GPS chip — solo el dot, sin texto */
+  .gps-chip {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+
+  /* Vehicle cards */
+  .vehicle-card {
+    padding: 12px 14px !important;
+    border-radius: 0 10px 10px 0 !important;
+  }
+
+  .vehicle-name { font-size: 14px !important; }
+  .vehicle-plate { font-size: 11px !important; }
+  .vehicle-time  { font-size: 11px !important; }
+
+  .status-badge {
+    font-size: 9px !important;
+    padding: 3px 7px !important;
+  }
+}
+

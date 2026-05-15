@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import { useIsMobile } from '../hooks/useIsMobile'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -93,6 +94,7 @@ export default function Dashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState(null)
   const [selectedUnitId, setSelectedUnitId] = useState(null)
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     checkUser()
@@ -142,8 +144,8 @@ export default function Dashboard() {
     <div style={styles.container}>
       <Header active="flota" user={user} gpsAge={ageSec} />
 
-      <main style={styles.main} className="page-enter">
-        <section style={styles.section}>
+      <main style={{ ...styles.main, padding: isMobile ? '12px' : '28px' }} className="page-enter">
+        <section style={{ ...styles.section, padding: isMobile ? '14px 14px' : '24px 26px' }}>
           <div style={styles.fleetHeader}>
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase' }}>Flota</h2>
             {!loading && unidades.length > 0 && (() => {
@@ -167,7 +169,7 @@ export default function Dashboard() {
           {loading ? (
             <div style={styles.empty}>Cargando...</div>
           ) : (
-            <div style={styles.fleetGrid}>
+            <div style={{ ...styles.fleetGrid, gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(5, minmax(0,1fr))' }}>
               {unidades.map((u, i) => {
                 const gps    = gpsActual.find(g => g.unidad_id === u.id)
                 const estado = getEstado(gps)
@@ -226,7 +228,7 @@ export default function Dashboard() {
         </section>
 
         {/* ── Mapa en vivo ─────────────────────────────────── */}
-        <section style={{ ...styles.section, marginTop: 16 }}>
+        <section style={{ ...styles.section, padding: isMobile ? '14px 14px' : '24px 26px', marginTop: 12 }}>
           <div style={{ ...styles.fleetHeader, marginBottom: 14 }}>
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase' }}>
               Mapa en vivo
@@ -490,10 +492,11 @@ function LiveFleetMap({ unidades, gpsActual, selectedUnitId, onSelectUnit }) {
     }
   }, [gpsActual, unidades, selectedUnitId])
 
+  const mob = window.innerWidth < 768
   return (
     <div
       ref={mapRef}
-      style={{ width: '100%', height: 460, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}
+      style={{ width: '100%', height: mob ? 260 : 460, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}
     />
   )
 }

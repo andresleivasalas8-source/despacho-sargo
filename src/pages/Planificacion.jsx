@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const HORA_INICIO = 6
 const HORA_FIN = 20
@@ -11,6 +12,7 @@ const T_CARGA = 15
 const SLOT_PX = 36 // ancho fijo de cada slot en píxeles
 
 export default function Planificacion() {
+  const isMobile = useIsMobile()
   const [user, setUser] = useState(null)
   const [pedidos, setPedidos] = useState([])
   const [obras, setObras] = useState([])
@@ -267,7 +269,7 @@ export default function Planificacion() {
     <div style={styles.container}>
       <Header active="planificacion" user={user} />
 
-      <main style={styles.main}>
+      <main style={{ ...styles.main, padding: isMobile ? 12 : 24 }}>
         <h2 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase' }}>Planificación</h2>
         <div style={styles.toolbar}>
           <div style={styles.fechaWrap}>

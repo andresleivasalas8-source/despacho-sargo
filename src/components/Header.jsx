@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const NAV = [
   { key: 'flota',         label: 'Flota',         path: '/' },
@@ -11,6 +12,7 @@ const NAV = [
 
 export default function Header({ active, user, gpsAge: gpsAgeProp }) {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [localGpsAge, setLocalGpsAge] = useState(null)
 
   // Si la página padre pasa gpsAge lo usa directamente.
@@ -51,54 +53,77 @@ export default function Header({ active, user, gpsAge: gpsAgeProp }) {
   return (
     <header className="app-header">
 
-      {/* Logo */}
-      <div style={s.logoWrap}>
-        <img src="/logo-sargo.png" alt="Sargo" style={s.logo} />
-        <div style={s.logoFade} />
-      </div>
+      {/* Fila 1: logo + derecha (GPS + user + salir) */}
+      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: isMobile ? 52 : '100%' }}>
 
-      {/* Navegación */}
-      <nav style={s.nav}>
-        {NAV.map(item => {
-          const isActive = item.key === active
-          return (
-            <button
-              key={item.key}
-              onClick={isActive ? undefined : () => navigate(item.path)}
-              className={`nav-btn${isActive ? ' nav-btn-active' : ''}`}
-            >
-              {item.label}
-            </button>
-          )
-        })}
-      </nav>
-
-      {/* Zona derecha — siempre con el mismo ancho fijo */}
-      <div style={s.right}>
-        <div className="gps-chip">
-          <div
-            className={gpsActive ? 'status-dot' : undefined}
-            style={{
-              width: 7, height: 7,
-              borderRadius: '50%',
-              flexShrink: 0,
-              background: gpsActive ? '#4ade80' : 'rgba(255,255,255,0.35)',
-            }}
-          />
-          <span>{gpsLabel}</span>
+        {/* Logo */}
+        <div style={{ ...s.logoWrap, height: isMobile ? 52 : '100%' }}>
+          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 140 : 200, transform: isMobile ? 'scale(1.4)' : 'scale(1.55)' }} />
+          <div style={s.logoFade} />
         </div>
 
-        <div style={s.userIcon} title={user?.email}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-        </div>
+        {/* Spacer en desktop — la nav llena este espacio */}
+        {!isMobile && (
+          <nav style={s.nav}>
+            {NAV.map(item => {
+              const isActive = item.key === active
+              return (
+                <button
+                  key={item.key}
+                  onClick={isActive ? undefined : () => navigate(item.path)}
+                  className={`nav-btn${isActive ? ' nav-btn-active' : ''}`}
+                >
+                  {item.label}
+                </button>
+              )
+            })}
+          </nav>
+        )}
 
-        <button onClick={logout} className="logout-btn-header">
-          Salir
-        </button>
+        {isMobile && <div style={{ flex: 1 }} />}
+
+        {/* Zona derecha */}
+        <div style={{ ...s.right, minWidth: isMobile ? 'auto' : 200, padding: isMobile ? '0 12px' : '0 20px', gap: isMobile ? 8 : 10 }}>
+          <div className="gps-chip">
+            <div
+              className={gpsActive ? 'status-dot' : undefined}
+              style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: gpsActive ? '#4ade80' : 'rgba(255,255,255,0.35)' }}
+            />
+            {!isMobile && <span>{gpsLabel}</span>}
+          </div>
+
+          {!isMobile && (
+            <div style={s.userIcon} title={user?.email}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </div>
+          )}
+
+          <button onClick={logout} className="logout-btn-header" style={{ fontSize: isMobile ? 11 : 12, padding: isMobile ? '5px 10px' : '6px 14px' }}>
+            Salir
+          </button>
+        </div>
       </div>
+
+      {/* Fila 2 (solo mobile): navegación full-width */}
+      {isMobile && (
+        <nav className="app-header-nav">
+          {NAV.map(item => {
+            const isActive = item.key === active
+            return (
+              <button
+                key={item.key}
+                onClick={isActive ? undefined : () => navigate(item.path)}
+                className={`nav-btn${isActive ? ' nav-btn-active' : ''}`}
+              >
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+      )}
     </header>
   )
 }
