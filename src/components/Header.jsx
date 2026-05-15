@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const NAV = [
-  { key: 'flota',         label: 'Flota',         path: '/' },
-  { key: 'clientes',      label: 'Clientes',      path: '/clientes' },
-  { key: 'pedidos',       label: 'Pedidos',       path: '/pedidos' },
-  { key: 'planificacion', label: 'Planificación', path: '/planificacion' },
+  { key: 'flota',         label: 'Flota',         labelMob: 'Flota',    path: '/' },
+  { key: 'clientes',      label: 'Clientes',      labelMob: 'Clientes', path: '/clientes' },
+  { key: 'pedidos',       label: 'Pedidos',       labelMob: 'Pedidos',  path: '/pedidos' },
+  { key: 'planificacion', label: 'Planificación', labelMob: 'Planif.',  path: '/planificacion' },
 ]
 
 export default function Header({ active, user, gpsAge: gpsAgeProp }) {
@@ -118,7 +118,7 @@ export default function Header({ active, user, gpsAge: gpsAgeProp }) {
                 onClick={isActive ? undefined : () => navigate(item.path)}
                 className={`nav-btn${isActive ? ' nav-btn-active' : ''}`}
               >
-                {item.label}
+                {item.labelMob}
               </button>
             )
           })}
