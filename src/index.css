@@ -340,8 +340,8 @@ button:disabled {
   }
 
   .nav-btn {
-    font-size: 13px !important;
-    padding: 7px 6px !important;
+    font-size: 15px !important;
+    padding: 8px 6px !important;
     flex: 1;
     text-align: center;
     border-radius: 7px !important;

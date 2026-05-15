@@ -54,11 +54,11 @@ export default function Header({ active, user, gpsAge: gpsAgeProp }) {
     <header className="app-header">
 
       {/* Fila 1: logo + derecha (GPS + user + salir) */}
-      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: isMobile ? 52 : '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: isMobile ? 62 : '100%' }}>
 
         {/* Logo */}
-        <div style={{ ...s.logoWrap, height: isMobile ? 52 : '100%' }}>
-          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 140 : 200, transform: isMobile ? 'scale(1.4)' : 'scale(1.55)' }} />
+        <div style={{ ...s.logoWrap, height: isMobile ? 62 : '100%' }}>
+          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 165 : 200, transform: isMobile ? 'scale(1.5)' : 'scale(1.55)' }} />
           <div style={s.logoFade} />
         </div>
 

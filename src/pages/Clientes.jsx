@@ -131,6 +131,7 @@ export default function Clientes() {
 
 // ─── COMPONENTE: TARJETA DE CLIENTE ─────────────────────────────────
 function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm }) {
+  const isMobile = useIsMobile()
   async function deleteCliente() {
     if (!confirm(`¿Eliminar cliente "${cliente.nombre}" y todas sus obras?`)) return
     await supabase.from('clientes').delete().eq('id', cliente.id)
@@ -147,8 +148,8 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm }) {
     <div style={styles.card}>
       <div style={styles.clienteHeader}>
         <div>
-          <strong style={styles.clienteName}>{cliente.nombre}</strong>
-          {cliente.telefono && <span style={styles.clienteTel}>· {cliente.telefono}</span>}
+          <strong style={{ ...styles.clienteName, fontSize: isMobile ? 14 : 16 }}>{cliente.nombre}</strong>
+          {cliente.telefono && <span style={{ ...styles.clienteTel, fontSize: isMobile ? 11 : 13 }}>· {cliente.telefono}</span>}
         </div>
         <div style={styles.clienteActions}>
           <button onClick={onAddObra} style={styles.btnSm}>+ Obra</button>
@@ -165,9 +166,9 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm }) {
             return (
               <div key={o.id} style={styles.obraRow}>
                 <div style={{ flex: 1 }}>
-                  <div style={styles.obraName}>{o.nombre}</div>
+                  <div style={{ ...styles.obraName, fontSize: isMobile ? 13 : 15 }}>{o.nombre}</div>
                   {o.direccion && (
-                    <div style={styles.obraDireccion}>{o.direccion}</div>
+                    <div style={{ ...styles.obraDireccion, fontSize: isMobile ? 11 : 13 }}>{o.direccion}</div>
                   )}
                   <div style={styles.obraTags}>
                     <span style={{ ...styles.tag, ...styles.tagGreen }}>
