@@ -93,6 +93,7 @@ export default function Dashboard() {
   const [, setTick] = useState(0)
   const [selectedVehicle, setSelectedVehicle] = useState(null)
   const [selectedUnitId, setSelectedUnitId] = useState(null)
+  const [mapFullscreen, setMapFullscreen] = useState(false)
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
@@ -228,15 +229,27 @@ export default function Dashboard() {
         </section>
 
         {/* ── Mapa en vivo ─────────────────────────────────── */}
-        <section style={{ ...styles.section, padding: isMobile ? '14px 14px' : '24px 26px', marginTop: 12 }}>
-          <div style={{ ...styles.fleetHeader, marginBottom: 14 }}>
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase' }}>
+        <section style={{
+          ...styles.section,
+          ...(mapFullscreen
+            ? { position: 'fixed', inset: 0, zIndex: 500, borderRadius: 0, margin: 0, padding: '12px 14px', display: 'flex', flexDirection: 'column' }
+            : { padding: isMobile ? '14px 14px' : '24px 26px', marginTop: 12 }
+          ),
+        }}>
+          <div style={{ ...styles.fleetHeader, marginBottom: 14, flexShrink: 0 }}>
+            <h2
+              style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '0.04em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}
+              onClick={() => setMapFullscreen(f => !f)}
+              title={mapFullscreen ? 'Cerrar pantalla completa' : 'Abrir en pantalla completa'}
+            >
               Mapa en vivo
             </h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: "'DM Sans', sans-serif" }}>
-                {gpsActual.length} unidades con señal
-              </span>
+              {!mapFullscreen && (
+                <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: "'DM Sans', sans-serif" }}>
+                  {gpsActual.length} unidades con señal
+                </span>
+              )}
               {!loading && (
                 <UnitsDropdown
                   unidades={unidades}
@@ -245,6 +258,25 @@ export default function Dashboard() {
                   onSelect={setSelectedUnitId}
                 />
               )}
+              <button
+                onClick={() => setMapFullscreen(f => !f)}
+                title={mapFullscreen ? 'Cerrar pantalla completa' : 'Pantalla completa'}
+                style={{
+                  background: mapFullscreen ? 'rgba(15,23,42,0.08)' : 'rgba(15,23,42,0.05)',
+                  border: '1px solid rgba(15,23,42,0.10)',
+                  borderRadius: 8, cursor: 'pointer',
+                  width: 32, height: 32,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, color: '#475569',
+                  fontSize: 16,
+                }}
+              >
+                {mapFullscreen ? '✕' : (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5"/>
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
           {!loading && (
@@ -253,6 +285,7 @@ export default function Dashboard() {
               gpsActual={gpsActual}
               selectedUnitId={selectedUnitId}
               onSelectUnit={setSelectedUnitId}
+              isFullscreen={mapFullscreen}
             />
           )}
         </section>
@@ -385,7 +418,7 @@ function UnitsDropdown({ unidades, gpsActual, selectedUnitId, onSelect }) {
 }
 
 // ─── LIVE FLEET MAP ──────────────────────────────────────────────────
-function LiveFleetMap({ unidades, gpsActual, selectedUnitId, onSelectUnit }) {
+function LiveFleetMap({ unidades, gpsActual, selectedUnitId, onSelectUnit, isFullscreen }) {
   const mapRef      = useRef(null)
   const mapInstance = useRef(null)
   const markers     = useRef([])
@@ -413,6 +446,12 @@ function LiveFleetMap({ unidades, gpsActual, selectedUnitId, onSelectUnit }) {
     mapInstance.current = map
     return () => { map.remove(); mapInstance.current = null }
   }, [])
+
+  // Cuando cambia fullscreen, invalidar el tamaño del mapa para que redibuje
+  useEffect(() => {
+    if (!mapInstance.current) return
+    setTimeout(() => mapInstance.current?.invalidateSize(), 50)
+  }, [isFullscreen])
 
   // Actualizar markers en cada sync GPS o cambio de selección
   useEffect(() => {
@@ -496,7 +535,14 @@ function LiveFleetMap({ unidades, gpsActual, selectedUnitId, onSelectUnit }) {
   return (
     <div
       ref={mapRef}
-      style={{ width: '100%', height: mob ? 260 : 460, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}
+      style={{
+        width: '100%',
+        height: isFullscreen ? undefined : (mob ? 260 : 460),
+        flex: isFullscreen ? 1 : undefined,
+        borderRadius: isFullscreen ? 10 : 12,
+        overflow: 'hidden',
+        border: '1px solid rgba(0,0,0,0.06)',
+      }}
     />
   )
 }
