@@ -358,7 +358,7 @@ button:disabled {
 
   /* Vehicle cards */
   .vehicle-card {
-    padding: 12px 14px !important;
+    padding: 8px 14px !important;
     border-radius: 0 10px 10px 0 !important;
   }
 

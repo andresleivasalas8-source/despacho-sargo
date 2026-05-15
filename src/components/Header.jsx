@@ -7,7 +7,7 @@ const NAV = [
   { key: 'flota',         label: 'Flota',         labelMob: 'Flota',    path: '/' },
   { key: 'clientes',      label: 'Clientes',      labelMob: 'Clientes', path: '/clientes' },
   { key: 'pedidos',       label: 'Pedidos',       labelMob: 'Pedidos',  path: '/pedidos' },
-  { key: 'planificacion', label: 'Planificación', labelMob: 'Plan.',    path: '/planificacion' },
+  { key: 'planificacion', label: 'Planificación', labelMob: 'Plan',     path: '/planificacion' },
 ]
 
 export default function Header({ active, user, gpsAge: gpsAgeProp }) {
@@ -58,7 +58,7 @@ export default function Header({ active, user, gpsAge: gpsAgeProp }) {
 
         {/* Logo */}
         <div style={{ ...s.logoWrap, height: isMobile ? 70 : '100%' }}>
-          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 182 : 200, transform: isMobile ? 'scale(1.55)' : 'scale(1.55)' }} />
+          <img src="/logo-sargo.png" alt="Sargo" style={{ ...s.logo, width: isMobile ? 164 : 200, transform: isMobile ? 'scale(1.55)' : 'scale(1.55)' }} />
           <div style={s.logoFade} />
         </div>
 
