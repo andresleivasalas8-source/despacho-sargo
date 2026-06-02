@@ -192,8 +192,8 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditC
         <div style={styles.clienteActions}>
           <button onClick={onHistorialCliente} style={styles.btnHistory}>Historial cliente</button>
           <button onClick={onAddObra} style={styles.btnSm}>+ Obra</button>
-          <button onClick={onEditCliente} style={styles.btnEdit}>✎</button>
-          <button onClick={deleteCliente} style={styles.btnSmDanger}>✕</button>
+          <button onClick={onEditCliente} style={styles.btnEdit} className="btn-icon">✎</button>
+          <button onClick={deleteCliente} style={styles.btnSmDanger} className="btn-icon">✕</button>
         </div>
       </div>
 
@@ -225,8 +225,8 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditC
                 </div>
                 <div style={{ display: 'flex', gap: 4, flexShrink: 0, alignItems: 'center' }}>
                   <button onClick={() => onHistorialObra(o)} style={styles.btnHistory}>Historial obra</button>
-                  <button onClick={() => onEditObra(o)} style={styles.btnEdit}>✎</button>
-                  <button onClick={() => deleteObra(o.id, o.nombre)} style={styles.btnSmDanger}>✕</button>
+                  <button onClick={() => onEditObra(o)} style={styles.btnEdit} className="btn-icon">✎</button>
+                  <button onClick={() => deleteObra(o.id, o.nombre)} style={styles.btnSmDanger} className="btn-icon">✕</button>
                 </div>
               </div>
             )
@@ -1196,7 +1196,7 @@ const styles = {
   btnSm: { fontSize: 13, padding: '6px 13px', background: '#fff', border: '1px solid #16a34a', color: '#16a34a', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
   btnSmDanger: { fontSize: 12, padding: '5px 10px', background: '#fff', border: '1px solid #cbd5e1', color: '#94a3b8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit' },
   btnEdit: { fontSize: 12, padding: '5px 10px', background: '#fff', border: '1px solid #cbd5e1', color: '#475569', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 },
-  btnHistory: { fontSize: 13, padding: '6px 13px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
+  btnHistory: { fontSize: 11, padding: '4px 8px', background: 'transparent', border: '1px solid #e2e8f0', color: '#94a3b8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
   empty: { textAlign: 'center', padding: 40, color: '#94a3b8', fontSize: 13, background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0' },
   clientesList: { display: 'flex', flexDirection: 'column', gap: 12 },
   card: { background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
@@ -1206,7 +1206,7 @@ const styles = {
   clienteActions: { display: 'flex', gap: 6 },
   noObras: { fontSize: 11, fontFamily: 'monospace', color: '#94a3b8', padding: '6px 0' },
   obrasList: { display: 'flex', flexDirection: 'column', gap: 6 },
-  obraRow: { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0' },
+  obraRow: { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 6, border: '1px solid #f1f5f9', borderLeft: '3px solid #e2e8f0' },
   obraName: { fontSize: 15, color: '#0f172a', fontWeight: 600, marginBottom: 4 },
   obraDireccion: { fontSize: 13, color: '#94a3b8', fontFamily: "'DM Sans', sans-serif", marginBottom: 6 },
   obraTags: { display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' },

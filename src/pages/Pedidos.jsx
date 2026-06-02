@@ -183,7 +183,7 @@ export default function Pedidos() {
           if (viajesActivos.length === 0) return null
           return (
             <section style={{...styles.liveTripsSection}}>
-              <h2 style={styles.cardTitle}>Live Trips · {viajesActivos.length} {viajesActivos.length === 1 ? 'viaje activo' : 'viajes activos'}</h2>
+              <h2 className="section-title">Live Trips · {viajesActivos.length} {viajesActivos.length === 1 ? 'viaje activo' : 'viajes activos'}</h2>
               <div style={styles.tripsList}>
                 {viajesActivos.map(v => {
                   const ped = pedidos.find(p => p.id === v.pedido_id)
@@ -215,7 +215,7 @@ export default function Pedidos() {
           )
         })()}
 
-        <h2 style={styles.cardTitle}>Pedidos del día</h2>
+        <h2 className="section-title">Pedidos del día</h2>
         {loading ? (
           <div style={styles.empty}>Cargando...</div>
         ) : pedidos.length === 0 ? (

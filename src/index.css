@@ -297,6 +297,16 @@ button:disabled {
   animation: pageIn 0.30s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* ── Icon buttons (✎ ✕) — visibles solo en hover ──────── */
+
+.btn-icon {
+  opacity: 0.30;
+  transition: opacity 0.15s ease;
+}
+.btn-icon:hover {
+  opacity: 1;
+}
+
 /* ── Logout ───────────────────────────────────────────── */
 
 .logout-btn-header {
