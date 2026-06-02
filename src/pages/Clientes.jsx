@@ -162,6 +162,11 @@ export default function Clientes() {
   )
 }
 
+function toTitleCase(str) {
+  if (!str) return str
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
+}
+
 // ─── COMPONENTE: TARJETA DE CLIENTE ─────────────────────────────────
 function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditCliente, onEditObra, onHistorialCliente, onHistorialObra }) {
   const isMobile = useIsMobile()
@@ -201,9 +206,9 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditC
             return (
               <div key={o.id} style={styles.obraRow}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ ...styles.obraName, fontSize: isMobile ? 13 : 15 }}>{o.nombre}</div>
+                  <div style={{ ...styles.obraName, fontSize: isMobile ? 13 : 15 }}>{toTitleCase(o.nombre)}</div>
                   {o.direccion && (
-                    <div style={{ ...styles.obraDireccion, fontSize: isMobile ? 11 : 13 }}>{o.direccion}</div>
+                    <div style={{ ...styles.obraDireccion, fontSize: isMobile ? 11 : 13 }}>{toTitleCase(o.direccion)}</div>
                   )}
                   <div style={styles.obraTags}>
                     <span style={{ ...styles.tag, ...styles.tagGreen }}>
