@@ -2,7 +2,7 @@
 //  SARGO GPS SYNC — pegar en consola de apps.visionblo.com/rb/
 //
 //  Qué hace: lee los datos GPS que WARA ya tiene cargados en pantalla,
-//  los manda a la app de despacho cada 30 segundos, y actualiza
+//  los manda a la app de despacho cada 10 segundos, y actualiza
 //  automáticamente el estado de los viajes según la ubicación del camión.
 //
 //  Para detener:    _sargoSync.detener()
@@ -14,7 +14,7 @@
 
   const SUPABASE_URL = 'https://kptqhtaemrikmeubnerz.supabase.co'
   const SUPABASE_KEY = 'sb_publishable_avU2YeeyZ-VtWSXm3hHKDg_1LvUos5d'
-  const INTERVALO_MS = 30000
+  const INTERVALO_MS = 10000
   const LOG = '[SARGO GPS]'
 
   const DEPOT = { lat: -32.9310777, lng: -68.8202575 }
@@ -262,7 +262,7 @@
     setBadge('loading', 'Iniciando...', '')
     syncSeguro()
     intervaloId = setInterval(syncSeguro, INTERVALO_MS)
-    console.log(LOG, 'Sync activo cada 30s.')
+    console.log(LOG, 'Sync activo cada 10s.')
   }
 
   window._sargoSync = {

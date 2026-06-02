@@ -20,8 +20,8 @@ function haversineM(lat1, lng1, lat2, lng2) {
 async function procesarGeo(positions) {
   try {
     const [viajesRes, pedidosRes, obrasRes] = await Promise.all([
-      supabase.from('viajes').select('id, estado, unidad_id, pedido_id').in('estado', ['cargando', 'viaje', 'obra', 'volviendo']),
-      supabase.from('pedidos').select('id, obra_id'),
+      supabase.from('viajes').select('id, estado, unidad_id, pedido_id, m3_cargado').in('estado', ['cargando', 'viaje', 'obra', 'volviendo']),
+      supabase.from('pedidos').select('id, obra_id, m3_real'),
       supabase.from('obras').select('id, lat, lng'),
     ])
 
@@ -61,6 +61,22 @@ async function procesarGeo(positions) {
         const { error } = await supabase.from('viajes').update(update).eq('id', viaje.id)
         if (!error) {
           console.log(`[Geo] ${viaje.unidad_id}: ${viaje.estado} → ${update.estado}`)
+
+          // Al salir de la obra, marcar m³ entregado automáticamente en el pedido
+          if (update.estado === 'volviendo' && viaje.pedido_id) {
+            const { data: viajesDelPedido } = await supabase
+              .from('viajes')
+              .select('m3_cargado, estado')
+              .eq('pedido_id', viaje.pedido_id)
+              .in('estado', ['volviendo', 'done'])
+            const m3YaComputado = (viajesDelPedido || []).reduce((s, v) => s + parseFloat(v.m3_cargado || 0), 0)
+            const m3Total = m3YaComputado + parseFloat(viaje.m3_cargado || 0)
+            const pedidoActual = pedidos.find(p => p.id === viaje.pedido_id)
+            if (!pedidoActual?.m3_real || m3Total > pedidoActual.m3_real) {
+              await supabase.from('pedidos').update({ m3_real: parseFloat(m3Total.toFixed(1)) }).eq('id', viaje.pedido_id)
+              console.log(`[Geo] m3_real pedido ${viaje.pedido_id}: ${m3Total.toFixed(1)}m³`)
+            }
+          }
         }
       }
     }

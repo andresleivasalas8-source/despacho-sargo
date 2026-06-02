@@ -245,17 +245,22 @@ export default function Pedidos() {
                     <div style={{ flex: 1 }}>
                       <div style={styles.pedidoTitle}>
                         {e.alertIcon && <span>{e.alertIcon}</span>}
-                        <strong style={styles.obraName}>{getObraNombre(p.obra_id)}</strong>
+                        <strong style={styles.clienteNameMain}>{getClienteNombre(p.cliente_id)}</strong>
                         <span style={styles.horario}>{p.horario.slice(0, 5)}</span>
                         <span style={styles.tag}>
                           {p.m3_real != null ? `${p.m3_real}m³ (real)` : `${p.m3}m³`}
                         </span>
+                        {p.corte != null && (
+                          <span style={styles.tagCorte}>
+                            {p.corte > 0 ? `+${p.corte}m³ corte` : '+ corte'}
+                          </span>
+                        )}
                         <span style={styles.tagTipo}>{p.tipo_hormigon}</span>
                         {p.con_bomba && <span style={styles.tagBomba}>BOMBA</span>}
                         {completo && <span style={styles.tagCompleto}>COMPLETO</span>}
                       </div>
-                      <div style={styles.clienteName}>
-                        {getClienteNombre(p.cliente_id)}
+                      <div style={styles.obraNameSub}>
+                        {getObraNombre(p.obra_id)}
                         {p.observaciones && <span style={styles.obs}> · {p.observaciones}</span>}
                       </div>
                       <div style={{ ...styles.alertText, color: e.alertColor }}>{e.alertLabel}</div>
@@ -680,6 +685,8 @@ function EditarPedidoModal({ pedido, clientes, obras, onClose, onSaved }) {
   const [tipoHormigon, setTipoHormigon] = useState(pedido.tipo_hormigon)
   const [conBomba, setConBomba] = useState(pedido.con_bomba)
   const [observaciones, setObservaciones] = useState(pedido.observaciones || '')
+  const [tieneCorte, setTieneCorte] = useState(pedido.corte != null)
+  const [corte, setCorte] = useState(pedido.corte != null && pedido.corte > 0 ? String(pedido.corte) : '')
   const [horario, setHorario] = useState(pedido.horario.slice(0, 5))
   const [fechaPed, setFechaPed] = useState(pedido.fecha)
   const [obraId, setObraId] = useState(pedido.obra_id)
@@ -700,6 +707,7 @@ function EditarPedidoModal({ pedido, clientes, obras, onClose, onSaved }) {
       tipo_hormigon: tipoHormigon,
       con_bomba: conBomba,
       observaciones: observaciones.trim() || null,
+      corte: tieneCorte ? (corte !== '' ? parseFloat(corte) : 0) : null,
     }).eq('id', pedido.id)
     setSaving(false)
     if (error) {
@@ -762,6 +770,32 @@ function EditarPedidoModal({ pedido, clientes, obras, onClose, onSaved }) {
               <option value="si">Con bomba</option>
             </select>
           </div>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Más corte</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 400, fontSize: 13, color: '#475569', textTransform: 'none', letterSpacing: 0 }}>
+              <input
+                type="checkbox"
+                checked={tieneCorte}
+                onChange={e => { setTieneCorte(e.target.checked); if (!e.target.checked) setCorte('') }}
+                style={{ width: 'auto', cursor: 'pointer', accentColor: '#16a34a' }}
+              />
+              ¿Tiene corte?
+            </label>
+            {tieneCorte && (
+              <input
+                type="number"
+                value={corte}
+                onChange={e => setCorte(e.target.value)}
+                placeholder="m³ (opcional)"
+                min="0" max="7" step="0.5"
+                style={{ ...styles.input, width: 140 }}
+              />
+            )}
+          </div>
+          {tieneCorte && <small style={styles.hint}>Dejá vacío para indicar "más corte" sin cantidad exacta.</small>}
         </div>
 
         <div style={styles.formGroup}>
@@ -899,6 +933,8 @@ function PedidoForm({ fecha, clientes, obras, onClose, onSaved }) {
   const [tipoHormigon, setTipoHormigon] = useState('H-25')
   const [conBomba, setConBomba] = useState(false)
   const [observaciones, setObservaciones] = useState('')
+  const [tieneCorte, setTieneCorte] = useState(false)
+  const [corte, setCorte] = useState('')
   const [horario, setHorario] = useState(() => {
     const d = new Date()
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
@@ -939,6 +975,7 @@ function PedidoForm({ fecha, clientes, obras, onClose, onSaved }) {
       tipo_hormigon: tipoHormigon,
       con_bomba: conBomba,
       observaciones: observaciones.trim() || null,
+      corte: tieneCorte ? (corte !== '' ? parseFloat(corte) : 0) : null,
       estado: 'pendiente',
     })
     setSaving(false)
@@ -1008,6 +1045,32 @@ function PedidoForm({ fecha, clientes, obras, onClose, onSaved }) {
         </div>
 
         <div style={styles.formGroup}>
+          <label style={styles.label}>Más corte</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 400, fontSize: 13, color: '#475569', textTransform: 'none', letterSpacing: 0 }}>
+              <input
+                type="checkbox"
+                checked={tieneCorte}
+                onChange={e => { setTieneCorte(e.target.checked); if (!e.target.checked) setCorte('') }}
+                style={{ width: 'auto', cursor: 'pointer', accentColor: '#16a34a' }}
+              />
+              ¿Tiene corte?
+            </label>
+            {tieneCorte && (
+              <input
+                type="number"
+                value={corte}
+                onChange={e => setCorte(e.target.value)}
+                placeholder="m³ (opcional)"
+                min="0" max="7" step="0.5"
+                style={{ ...styles.input, width: 140 }}
+              />
+            )}
+          </div>
+          {tieneCorte && <small style={styles.hint}>Dejá vacío para indicar "más corte" sin cantidad exacta.</small>}
+        </div>
+
+        <div style={styles.formGroup}>
           <label style={styles.label}>Observaciones</label>
           <input type="text" value={observaciones} onChange={e => setObservaciones(e.target.value)}
             style={styles.input} placeholder="Ej: pluma 30m, acceso por calle lateral, etc." />
@@ -1043,11 +1106,14 @@ const styles = {
   pedidoHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 10 },
   pedidoTitle: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 },
   obraName: { fontSize: 14, color: '#0f172a' },
+  clienteNameMain: { fontSize: 15, color: '#0f172a', fontWeight: 700 },
+  obraNameSub: { fontSize: 12, color: '#64748b', fontFamily: 'monospace', marginBottom: 2 },
   horario: { fontSize: 12, fontFamily: 'monospace', color: '#475569', background: '#f1f5f9', padding: '2px 8px', borderRadius: 4 },
   tag: { fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: '#dcfce7', color: '#16a34a' },
   tagTipo: { fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: '#e2e8f0', color: '#475569' },
   tagBomba: { fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: '#ede9fe', color: '#7c3aed' },
   tagCompleto: { fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: '#16a34a', color: '#fff' },
+  tagCorte: { fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' },
   clienteName: { fontSize: 11, color: '#64748b', fontFamily: 'monospace' },
   obs: { fontStyle: 'italic' },
   alertText: { fontSize: 11, fontWeight: 600, marginTop: 4, fontFamily: 'monospace' },
