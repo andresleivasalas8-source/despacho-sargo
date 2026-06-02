@@ -185,7 +185,7 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditC
           {cliente.telefono && <span style={{ ...styles.clienteTel, fontSize: isMobile ? 11 : 13 }}>· {cliente.telefono}</span>}
         </div>
         <div style={styles.clienteActions}>
-          <button onClick={onHistorialCliente} style={styles.btnHistory}>Historial</button>
+          <button onClick={onHistorialCliente} style={styles.btnHistory}>Historial cliente</button>
           <button onClick={onAddObra} style={styles.btnSm}>+ Obra</button>
           <button onClick={onEditCliente} style={styles.btnEdit}>✎</button>
           <button onClick={deleteCliente} style={styles.btnSmDanger}>✕</button>
@@ -219,7 +219,7 @@ function ClienteCard({ cliente, obras, onAddObra, onReload, haversineKm, onEditC
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 4, flexShrink: 0, alignItems: 'center' }}>
-                  <button onClick={() => onHistorialObra(o)} style={styles.btnHistory}>Historial</button>
+                  <button onClick={() => onHistorialObra(o)} style={styles.btnHistory}>Historial obra</button>
                   <button onClick={() => onEditObra(o)} style={styles.btnEdit}>✎</button>
                   <button onClick={() => deleteObra(o.id, o.nombre)} style={styles.btnSmDanger}>✕</button>
                 </div>
@@ -1191,7 +1191,7 @@ const styles = {
   btnSm: { fontSize: 13, padding: '6px 13px', background: '#fff', border: '1px solid #16a34a', color: '#16a34a', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
   btnSmDanger: { fontSize: 12, padding: '5px 10px', background: '#fff', border: '1px solid #cbd5e1', color: '#94a3b8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit' },
   btnEdit: { fontSize: 12, padding: '5px 10px', background: '#fff', border: '1px solid #cbd5e1', color: '#475569', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 },
-  btnHistory: { fontSize: 11, padding: '5px 10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
+  btnHistory: { fontSize: 13, padding: '6px 13px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 5, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 },
   empty: { textAlign: 'center', padding: 40, color: '#94a3b8', fontSize: 13, background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0' },
   clientesList: { display: 'flex', flexDirection: 'column', gap: 12 },
   card: { background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
